@@ -1,0 +1,25 @@
+{
+  "name": "status-open-bounty-bot",
+  "version": "0.1.0",
+  "description": "A Twitter bot that posts when there is activity in Status Open Bounty",
+  "main": "server.js",
+  "scripts": {
+    "start": "node server.js"
+  },
+  "dependencies": {
+    "express": "^4.16.2",
+    "twitter": "^1.7.1"
+  },
+  "engines": {
+    "node": "8.x"
+  },
+  "repository": {
+    "url": ""
+  },
+  "license": "MIT",
+  "devDependencies": {
+    "babel-eslint": "^8.0.2",
+    "eslint": "^4.12.0",
+    "eslint-plugin-react": "^7.5.1"
+  }
+}
