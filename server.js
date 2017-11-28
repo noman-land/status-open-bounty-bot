@@ -106,6 +106,6 @@ const listener = app.listen(PORT, () => {
   fetchAndTweet();
   setInterval(() => {
     fetchAndTweet();
-    //keepAlive();
+    keepAlive();
   }, POLL_FREQUENCY);
 });
