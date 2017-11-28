@@ -14,7 +14,7 @@
     "node": "8.x"
   },
   "repository": {
-    "url": ""
+    "url": "https://github.com/noman-land/status-open-bounty-bot"
   },
   "license": "MIT",
   "devDependencies": {
