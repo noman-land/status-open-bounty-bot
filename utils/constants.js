@@ -6,7 +6,7 @@ const itemTypeVerbs = {
   'open-claim': 'submitted'
 };
 
-const POLL_FREQUENCY = 10 * 60 * 1000;
+const POLL_FREQUENCY = 15 * 60 * 1000;
 
 module.exports = {
   itemTypeVerbs,
