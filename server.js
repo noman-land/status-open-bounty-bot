@@ -2,7 +2,7 @@
 const express = require('express');
 const Twitter = require('twitter');
 
-const { getActivity, getBounties, keepAlive } = require('./utils/ajax');
+const { getActivity, getBounties } = require('./utils/ajax');
 const { POLL_FREQUENCY } = require('./utils/constants');
 const { activityToMessage, bountyToMessage } = require('./utils/utils');
 
@@ -106,6 +106,5 @@ const listener = app.listen(PORT, () => {
   fetchAndTweet();
   setInterval(() => {
     fetchAndTweet();
-    keepAlive();
   }, POLL_FREQUENCY);
 });
