@@ -4,6 +4,7 @@ const Twitter = require('twitter');
 
 const { getActivity, getBounties } = require('./utils/ajax');
 const { POLL_FREQUENCY } = require('./utils/constants');
+const { getLastPostedActivity, setLastPostedActivity } = require('./utils/redisUtils');
 const { activityToMessage, bountyToMessage } = require('./utils/utils');
 
 const app = express();
@@ -23,50 +24,42 @@ const client = new Twitter({
   access_token_secret: ACCESS_TOKEN_SECRET,
 });
 
-let lastPostedActivity = {
-  updated: new Date(),
-};
-
-let lastPostedBounty = {
-  updated: new Date(),
-};
-
 app.get("/", (request, response) => response.send('TestBoyBot is running.'));
 
 function postTweet(message) {
   return new Promise((resolve, reject) => {
-    client.post('statuses/update', { status: message },  function(error, tweet, response) {
+    client.post('statuses/update', { status: message },  function(error, tweet) {
       if (error) reject(error);
-      console.log('Posted:', message);
       resolve(tweet);
     });
   });
 }
 
 const filterNew = lastActivity => activities => {
+  console.log('Last posted activity:', lastActivity.updated);
   return activities.filter(activity => new Date(activity.updated) > new Date(lastActivity.updated));
 };
 
 function fetchAndTweet() {
-  getBounties()
-    .then(filterNew(lastPostedBounty))
+  Promise.all([getLastPostedActivity(), getBounties()])
+    .then(([lastPostedActivity, bounties]) => filterNew(lastPostedActivity)(bounties))
     .then(newBounties => {
       const newBountiesLength = newBounties.length;
-      console.log('New bounties:', newBountiesLength, '\n', newBounties);
+      console.log('New bounties:', newBountiesLength);
       if (!newBountiesLength) {
         return;
       }
 
       return new Promise((resolve, reject) => {
         return resolve(newBounties.map(bounty => {
-          if (!parseFloat(bounty.valueUsd, 10)) {
-            lastPostedBounty = bounty;
+          if (!parseFloat(bounty.valueUsd)) {
+            setLastPostedActivity(bounty);
             return bounty;
           }
           const message = bountyToMessage(bounty);
           return postTweet(message).then(tweet => {
-            lastPostedBounty = bounty;
-            console.log('Posted', newBountiesLength, 'new bounties at', lastPostedBounty.updated);
+            setLastPostedActivity(bounty);
+            console.log('Tweet posted:', message);
             return tweet;
           }).catch(error => console.error('Problem posting tweet', message, error));
         }));
@@ -75,11 +68,11 @@ function fetchAndTweet() {
     })
     .catch(error => console.error(error));
 
-  getActivity()
-    .then(filterNew(lastPostedActivity))
+  Promise.all([getLastPostedActivity(), getActivity()])
+    .then(([lastPostedActivity, activities]) => filterNew(lastPostedActivity)(activities))
     .then(newActivities => {
       const newActivitiesLength = newActivities.length;
-      console.log('New activities:', newActivitiesLength, '\n', newActivities);
+      console.log('New activities:', newActivitiesLength);
       if (!newActivitiesLength) {
         return;
       }
@@ -88,9 +81,8 @@ function fetchAndTweet() {
         return resolve(newActivities.map(activity => {
           const message = activityToMessage(activity);
           return postTweet(message).then(tweet => {
-            console.log('Posted', newActivitiesLength, 'new activities.');
-            lastPostedActivity = activity;
-            console.log('New lastPostedActivity set at', lastPostedActivity.updated);
+            console.log('Tweet posted:', message);
+            setLastPostedActivity(activity);
             return tweet;
           }).catch(error => console.error('Problem posting tweet', message, error));
         }));
@@ -104,7 +96,5 @@ const listener = app.listen(PORT, () => {
   console.log('Your app is listening on port ' + listener.address().port);
 
   fetchAndTweet();
-  setInterval(() => {
-    fetchAndTweet();
-  }, POLL_FREQUENCY);
+  setInterval(fetchAndTweet, POLL_FREQUENCY);
 });

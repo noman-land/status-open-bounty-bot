@@ -1,5 +1,3 @@
-const http = require('https');
-const { itemTypeVerbs, SOB_ACTIVITY_URL, SOB_BOUNTIES_URL } = require('./constants');
 
 const activityToMessage = activity => {
   const { displayName, issueTitle, itemType, valueUsd } = activity;

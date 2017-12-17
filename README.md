@@ -23,6 +23,7 @@ Posting to Twitter when bounties on Status Open Bounty are added, updated, or cl
     ACCESS_TOKEN_KEY=xxxxxxxxxx
     ACCESS_TOKEN_SECRET=xxxxxxxxxx
     SOB_BASE_URL=https://openbounty.status.im:444
+    REDIS_URI=user:pass@databaseurl.com:45149
     ```
 5. Fire up the app with:
     ```
